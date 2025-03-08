@@ -7,11 +7,10 @@ import (
 )
 
 func (s *DefaultServer) HandleInitialize(ctx context.Context, req *protocol.JSONRPCRequest) (interface{}, error) {
-	// 假设简单实现
-	return &protocol.InitializeResult{
+	return protocol.InitializeResult{
 		ProtocolVersion: protocol.LatestProtocolVersion,
 		Capabilities:    protocol.ServerCapabilities{},
-		ServerInfo:      protocol.Implementation{Name: "mcp-server", Version: "1.0"},
+		ServerInfo:      protocol.Implementation{Name: "mock-server", Version: "1.0"},
 	}, nil
 }
 

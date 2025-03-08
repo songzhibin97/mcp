@@ -9,7 +9,7 @@ import (
 func (s *DefaultServer) HandleCallTool(ctx context.Context, req *protocol.JSONRPCRequest) (interface{}, error) {
 	return &protocol.CallToolResult{
 		Content: []interface{}{
-			protocol.TextContent{Type: "text", Text: "Tool executed"},
+			protocol.TextContent{ContentType: "text", Text: "Tool executed"},
 		},
 	}, nil
 }
