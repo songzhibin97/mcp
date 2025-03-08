@@ -42,7 +42,7 @@ func main() {
 				JSONRPC: protocol.JSONRPCVersion,
 				ID:      "prompt-1",
 				Result: protocol.Result{
-					"messages": []protocol.PromptMessage{{Role: "user", Content: protocol.TextContent{Type: "text", Text: "Hello"}}},
+					"messages": []protocol.PromptMessage{{Role: "user", Content: protocol.TextContent{ContentType: "text", Text: "Hello"}}},
 				},
 			},
 			protocol.NewProgressNotification("task-1", 50, 100),
