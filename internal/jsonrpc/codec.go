@@ -17,6 +17,7 @@ func Encode(msg protocol.JSONRPCMessage) ([]byte, error) {
 }
 
 // Decode 将字节数组解码为 JSON-RPC 消息
+// Decode 将字节数组解码为 JSON-RPC 消息
 func Decode(data []byte) (protocol.JSONRPCMessage, error) {
 	var raw map[string]interface{}
 	if err := json.Unmarshal(data, &raw); err != nil {
@@ -49,6 +50,60 @@ func Decode(data []byte) (protocol.JSONRPCMessage, error) {
 			return nil, fmt.Errorf("failed to decode JSONRPCRequest: %w", err)
 		}
 		return &req, nil
+	}
+
+	// 处理通知类型
+	if method, ok := raw["method"].(string); ok {
+		switch method {
+		case "notifications/progress":
+			var notif protocol.ProgressNotification
+			if err := json.Unmarshal(data, &notif); err != nil {
+				return nil, fmt.Errorf("failed to decode ProgressNotification: %w", err)
+			}
+			return &notif, nil
+		case "notifications/cancelled":
+			var notif protocol.CancelledNotification
+			if err := json.Unmarshal(data, &notif); err != nil {
+				return nil, fmt.Errorf("failed to decode CancelledNotification: %w", err)
+			}
+			return &notif, nil
+		case "notifications/message":
+			var notif protocol.LoggingMessageNotification
+			if err := json.Unmarshal(data, &notif); err != nil {
+				return nil, fmt.Errorf("failed to decode LoggingMessageNotification: %w", err)
+			}
+			return &notif, nil
+		case "notifications/resources/updated":
+			var notif protocol.ResourceUpdatedNotification
+			if err := json.Unmarshal(data, &notif); err != nil {
+				return nil, fmt.Errorf("failed to decode ResourceUpdatedNotification: %w", err)
+			}
+			return &notif, nil
+		case "notifications/resources/list_changed":
+			var notif protocol.ResourceListChangedNotification
+			if err := json.Unmarshal(data, &notif); err != nil {
+				return nil, fmt.Errorf("failed to decode ResourceListChangedNotification: %w", err)
+			}
+			return &notif, nil
+		case "notifications/prompts/list_changed":
+			var notif protocol.PromptListChangedNotification
+			if err := json.Unmarshal(data, &notif); err != nil {
+				return nil, fmt.Errorf("failed to decode PromptListChangedNotification: %w", err)
+			}
+			return &notif, nil
+		case "notifications/tools/list_changed":
+			var notif protocol.ToolListChangedNotification
+			if err := json.Unmarshal(data, &notif); err != nil {
+				return nil, fmt.Errorf("failed to decode ToolListChangedNotification: %w", err)
+			}
+			return &notif, nil
+		case "notifications/initialized":
+			var notif protocol.InitializedNotification
+			if err := json.Unmarshal(data, &notif); err != nil {
+				return nil, fmt.Errorf("failed to decode InitializedNotification: %w", err)
+			}
+			return &notif, nil
+		}
 	}
 
 	var notif protocol.JSONRPCNotification

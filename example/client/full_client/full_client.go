@@ -16,9 +16,9 @@ func main() {
 	tr := transport.NewMockTransport()
 	c := client.NewDefaultClient(tr)
 
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second) // 延长超时
+	defer cancel()
 
-	// 模拟服务器响应多个请求
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		responses := []interface{}{
@@ -45,6 +45,13 @@ func main() {
 					"messages": []protocol.PromptMessage{{Role: "user", Content: protocol.TextContent{Type: "text", Text: "Hello"}}},
 				},
 			},
+			protocol.NewProgressNotification("task-1", 50, 100),
+			protocol.NewCancelledNotification("1", "timeout"),
+			protocol.NewLoggingMessageNotification("info", "Server started"),
+			protocol.NewResourceUpdatedNotification("file://test"),
+			protocol.NewResourceListChangedNotification(),
+			protocol.NewPromptListChangedNotification(),
+			protocol.NewToolListChangedNotification(),
 		}
 		for _, resp := range responses {
 			tr.InjectMessage(resp)
@@ -55,7 +62,6 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(3)
 
-	// 并发发送请求
 	go func() {
 		defer wg.Done()
 		result, err := c.Initialize(ctx, protocol.LatestProtocolVersion, protocol.ClientCapabilities{}, protocol.Implementation{Name: "full-client", Version: "1.0"})
@@ -87,6 +93,8 @@ func main() {
 	}()
 
 	wg.Wait()
+
+	time.Sleep(1 * time.Second) // 等待通知处理
 
 	if err := c.Close(); err != nil {
 		log.Fatalf("Close failed: %v", err)

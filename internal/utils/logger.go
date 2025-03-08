@@ -1,6 +1,7 @@
-package util
+package utils
 
 import (
+	"context"
 	"log/slog"
 	"os"
 )
@@ -14,7 +15,7 @@ type Logger struct {
 func NewLogger() *Logger {
 	return &Logger{
 		logger: slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelDebug, // 默认记录所有级别，后续可通过配置调整
+			Level: slog.LevelDebug, // 默认记录所有级别
 		})),
 	}
 }
@@ -31,7 +32,7 @@ func (l *Logger) Info(msg string, args ...any) {
 
 // Notice 记录通知信息
 func (l *Logger) Notice(msg string, args ...any) {
-	l.logger.Log(nil, slog.LevelInfo+1, msg, args...) // Notice 介于 Info 和 Warn 之间
+	l.logger.Log(nil, slog.LevelInfo+1, msg, args...)
 }
 
 // Warn 记录警告信息
@@ -42,6 +43,32 @@ func (l *Logger) Warn(msg string, args ...any) {
 // Error 记录错误信息
 func (l *Logger) Error(msg string, args ...any) {
 	l.logger.Error(msg, args...)
+}
+
+// Log 根据指定级别动态记录日志
+func (l *Logger) Log(ctx context.Context, level string, msg string, args ...any) {
+	var slogLevel slog.Level
+	switch level {
+	case "debug":
+		slogLevel = slog.LevelDebug
+	case "info":
+		slogLevel = slog.LevelInfo
+	case "notice":
+		slogLevel = slog.LevelInfo + 1
+	case "warning":
+		slogLevel = slog.LevelWarn
+	case "error":
+		slogLevel = slog.LevelError
+	case "critical":
+		slogLevel = slog.LevelError + 1
+	case "alert":
+		slogLevel = slog.LevelError + 2
+	case "emergency":
+		slogLevel = slog.LevelError + 3
+	default:
+		slogLevel = slog.LevelInfo
+	}
+	l.logger.Log(ctx, slogLevel, msg, args...)
 }
 
 // SetLevel 设置日志级别
@@ -58,10 +85,14 @@ func (l *Logger) SetLevel(level string) {
 		slogLevel = slog.LevelWarn
 	case "error":
 		slogLevel = slog.LevelError
-	case "critical", "alert", "emergency": // 映射到 slog 的更高级别
-		slogLevel = slog.LevelError + 4
+	case "critical":
+		slogLevel = slog.LevelError + 1
+	case "alert":
+		slogLevel = slog.LevelError + 2
+	case "emergency":
+		slogLevel = slog.LevelError + 3
 	default:
-		slogLevel = slog.LevelInfo // 默认级别
+		slogLevel = slog.LevelInfo
 	}
 	l.logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		Level: slogLevel,
